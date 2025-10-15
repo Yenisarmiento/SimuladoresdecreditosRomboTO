@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simuladores de crédito — Rombo / Tecnológica del Oriente</title>
+  <style>
+    :root {
+      --blue: #0b5ed7;
+      --yellow: #ffc107;
+      --dark: #0b2540;
+      --muted: #d4d9e2;
+      --bgA: linear-gradient(135deg,#08325b 0%, #0b5ed7 100%);
+      --glass: rgba(255,255,255,0.08);
+      --accent: #ffd166;
+      --card: rgba(255,255,255,0.1);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bgA);
+      color:#eef7ff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      padding:20px;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:900px;
+    }
+
+    .header{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      border-radius:14px;
+      background:var(--glass);
+      backdrop-filter:blur(8px);
+      box-shadow:0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    .logos{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    .logos img{
+      height:60px;
+      width:auto;
+      background:rgba(255,255,255,0.1);
+      padding:6px;
+      border-radius:8px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.2);
+    }
+
+    h1{
+      margin:10px 0 6px 0;
+      font-size:24px;
+      text-align:center;
+      color:#fff;
+    }
+
+    p.sub{
+      color:var(--muted);
+      text-align:center;
+      font-size:14px;
+    }
+
+    .card{
+      background:var(--glass);
+      border-radius:14px;
+      padding:24px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.25);
+      margin-top:24px;
+      backdrop-filter:blur(10px);
+    }
+
+    .options{
+      display:flex;
+      flex-wrap:wrap;
+      gap:20px;
+      justify-content:center;
+      margin-top:10px;
+    }
+
+    .option{
+      flex:1 1 280px;
+      padding:20px;
+      border-radius:12px;
+      text-align:center;
+      background:rgba(255,255,255,0.1);
+      transition:all 0.25s ease;
+      cursor:pointer;
+    }
+
+    .option:hover{
+      background:rgba(255,255,255,0.18);
+      transform:translateY(-3px);
+    }
+
+    .option h3{
+      margin:0 0 8px 0;
+      font-size:19px;
+      color:#fff;
+    }
+
+    .option p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .btn{
+      display:inline-block;
+      margin-top:16px;
+      padding:10px 18px;
+      border-radius:10px;
+      background:var(--accent);
+      color:#062234;
+      text-decoration:none;
+      font-weight:700;
+      font-size:14px;
+      transition:background 0.2s ease;
+    }
+
+    .btn:hover{
+      background:#ffe08a;
+    }
+
+    @media (max-width:600px){
+      h1{font-size:20px;}
+      .option{flex:1 1 100%;}
+      .logos img{height:48px;}
+      body{padding:12px;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logos">
+        <img src="./img/logo-rombo.png" alt="Rombo" />
+        <img src="./img/logo-tecnologica.png" alt="Tecnológica del Oriente" />
+      </div>
+      <div style="flex:1 1 100%;">
+        <h1>Simuladores de crédito</h1>
+        <p class="sub">Rombo · Tecnológica del Oriente</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="options">
+        <div class="option">
+          <h3>Crédito mensual</h3>
+          <p>Plazos: 4 o 6 meses · Tasa fija 1.8% mensual</p>
+          <a class="btn" href="simulador_mensual.html">Abrir simulador mensual</a>
+        </div>
+
+        <div class="option">
+          <h3>Crédito quincenal</h3>
+          <p>12 cuotas fijas · Tasa quincenal 0,896%</p>
+          <a class="btn" href="simulador_quincenal.html">Abrir simulador quincenal</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

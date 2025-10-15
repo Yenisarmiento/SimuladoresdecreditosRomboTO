@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simulador de crédito — Mensual (4 o 6 meses)</title>
+
+  <style>
+    :root{
+      --blue:#0b5ed7;
+      --yellow:#ffc107;
+      --dark:#0b2540;
+      --muted:#6b7280;
+      --bgA:linear-gradient(135deg,#08325b 0%, #0b5ed7 100%);
+      --card:#ffffff;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      margin:0;
+      background:var(--bgA);
+      color:var(--dark);
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .wrap{max-width:1100px;margin:0 auto;}
+    .header{
+      display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;
+      background:white;padding:14px;border-radius:12px;
+      box-shadow:0 6px 18px rgba(11,37,64,0.15);
+    }
+    .logos{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
+    .logos img{height:56px;width:auto;background:white;padding:6px;border-radius:8px;box-shadow:0 6px 18px rgba(11,37,64,0.04);}
+    h1{margin:0;font-size:22px;text-align:center;color:var(--dark);}
+    p.sub{margin:6px 0 0;text-align:center;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;margin-top:18px;}
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:16px;
+      box-shadow:0 8px 30px rgba(11,37,64,0.1);
+    }
+
+    label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;color:var(--dark);}
+    input[type="number"],select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid #e6eef7;
+      font-size:14px;
+      background:white;
+    }
+    .small{font-size:13px;color:var(--muted);margin-top:6px}
+
+    .controls{
+      display:flex;gap:8px;margin-top:12px;align-items:center;
+      flex-wrap:wrap;justify-content:flex-start
+    }
+    button{
+      background:var(--blue);color:white;border:0;padding:10px 14px;
+      border-radius:10px;font-weight:700;cursor:pointer;
+      transition:background 0.2s ease;
+    }
+    button:hover{background:#0847a5;}
+    button.yellow{background:var(--yellow);color:var(--dark);}
+    a.back{
+      padding:10px 14px;
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--blue);
+      font-weight:700;
+      border:2px solid var(--blue);
+      transition:all 0.3s ease;
+    }
+    a.back:hover{
+      background:var(--blue);
+      color:white;
+    }
+
+    .result{
+      border-radius:10px;
+      padding:12px;
+      background:linear-gradient(180deg,#ffffff,#fbfdff);
+      border:1px solid #eef6ff;
+    }
+    .big{font-size:20px;font-weight:800;color:var(--dark);}
+    .muted{color:var(--muted);}
+
+    table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;}
+    table th,table td{
+      padding:8px 6px;
+      border-bottom:1px solid #eef3f6;
+      text-align:right;
+    }
+    table th{text-align:left;color:var(--muted);font-weight:700;}
+    .table-wrap{
+      max-height:360px;
+      overflow:auto;
+      margin-top:10px;
+      background:white;
+      padding:8px;
+      border-radius:8px;
+      border:1px solid #eef3f6;
+    }
+
+    @media(max-width:800px){
+      .grid{grid-template-columns:1fr;}
+      .header{text-align:center;}
+      .controls{justify-content:center;}
+      h1{font-size:18px;}
+      .wrap{padding:10px;}
+      .table-wrap{max-height:none;overflow-x:auto;}
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logos">
+        <img src="./img/logo-rombo.png" alt="Rombo" />
+        <img src="./img/logo-tecnologica.png" alt="Tecnológica del Oriente" />
+      </div>
+      <div style="flex:1 1 100%;">
+        <h1>Simulador de crédito — Mensual (4 o 6 meses)</h1>
+        <p class="sub">Tasa fija 1.8% mensual · Cuota inicial del 15% al 40% · Gastos de plataforma $50.000</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Formulario -->
+      <div class="card">
+        <label>Monto total del crédito (COP)</label>
+        <input id="monto" type="number" placeholder="Ej. 2,000,000" />
+
+        <label style="margin-top:12px;">Cuota inicial (%)</label>
+        <input id="inicial" type="number" min="15" max="40" placeholder="Entre 15% y 40%" />
+        <div class="small">Debe ser mínimo del 15% y máximo del 40%</div>
+
+        <label style="margin-top:12px;">Plazo en meses</label>
+        <select id="plazo">
+          <option value="4">4 meses</option>
+          <option value="6">6 meses</option>
+        </select>
+
+        <div class="controls">
+          <button onclick="calcular()">Calcular</button>
+          <button class="yellow" onclick="generarPDF()">PDF</button>
+          <a class="back" href="index.html">Volver al inicio</a>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="card">
+        <div class="result" id="resultado">
+          <p class="muted">Resultado:</p>
+          <p class="big">Ingrese los datos para calcular.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card" style="margin-top:18px;">
+      <h3>Tabla de amortización</h3>
+      <div class="table-wrap">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Capital</th>
+              <th>Interés</th>
+              <th>Cuota total</th>
+              <th>Saldo final</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formato(valor){
+      return valor.toLocaleString('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0});
+    }
+
+    function calcular(){
+      const monto=parseFloat(document.getElementById('monto').value);
+      const inicialPorc=parseFloat(document.getElementById('inicial').value);
+      const plazo=parseInt(document.getElementById('plazo').value);
+      const interes=0.018;
+      const gastosPlataforma=50000;
+
+      if(isNaN(monto)||monto<=0){
+        alert('Ingrese un monto válido');
+        return;
+      }
+      if(isNaN(inicialPorc)||inicialPorc<15||inicialPorc>40){
+        alert('La cuota inicial debe estar entre 15% y 40%');
+        return;
+      }
+
+      const cuotaInicial=monto*(inicialPorc/100);
+      const totalInicial=cuotaInicial+gastosPlataforma;
+      const saldo=monto-cuotaInicial;
+      const abonoCapital=saldo/plazo;
+
+      let saldoInicial=saldo;
+      let totalInteres=0;
+      let totalCuotas=0;
+
+      const tbody=document.querySelector('#tabla tbody');
+      tbody.innerHTML='';
+
+      for(let i=1;i<=plazo;i++){
+        const interesMes=saldoInicial*interes;
+        const cuotaMes=abonoCapital+interesMes;
+        const saldoFinal=saldoInicial-abonoCapital;
+
+        totalInteres+=interesMes;
+        totalCuotas+=cuotaMes;
+
+        tbody.insertAdjacentHTML('beforeend',`
+          <tr>
+            <td>${i}</td>
+            <td>${formato(abonoCapital)}</td>
+            <td>${formato(interesMes)}</td>
+            <td>${formato(cuotaMes)}</td>
+            <td>${formato(saldoFinal>0?saldoFinal:0)}</td>
+          </tr>
+        `);
+        saldoInicial=saldoFinal;
+      }
+
+      tbody.insertAdjacentHTML('beforeend',`
+        <tr style="font-weight:bold;background:#f9fafb;">
+          <td>Total</td>
+          <td>${formato(saldo)}</td>
+          <td>${formato(totalInteres)}</td>
+          <td>${formato(totalCuotas)}</td>
+          <td></td>
+        </tr>
+      `);
+
+      document.getElementById('resultado').innerHTML=`
+        <p class="muted">Resumen:</p>
+        <p>Cuota inicial: <strong>${formato(cuotaInicial)}</strong></p>
+        <p>Gastos de plataforma: <strong>${formato(gastosPlataforma)}</strong></p>
+        <p>Total a pagar inicialmente: <strong>${formato(totalInicial)}</strong></p>
+        <p>Saldo financiado: <strong>${formato(saldo)}</strong></p>
+        <p class="big">Primera cuota: ${formato(abonoCapital+saldo*interes)}</p>
+        <p>Última cuota: ${formato(abonoCapital+(abonoCapital*interes))}</p>
+      `;
+    }
+
+    async function generarPDF(){
+      const{jsPDF}=window.jspdf;
+      const pdf=new jsPDF('p','pt','a4');
+      const elemento=document.body;
+      const canvas=await html2canvas(elemento,{scale:2});
+      const imgData=canvas.toDataURL('image/png');
+      const imgProps=pdf.getImageProperties(imgData);
+      const pdfWidth=pdf.internal.pageSize.getWidth();
+      const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
+      pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+      pdf.save('Simulador_Mensual_Rombo.pdf');
+    }
+  </script>
+</body>
+</html>

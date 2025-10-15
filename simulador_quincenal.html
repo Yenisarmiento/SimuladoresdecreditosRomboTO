@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simulador de crédito — Quincenal (12 cuotas fijas)</title>
+
+  <style>
+    :root{
+      --blue:#0b5ed7;
+      --yellow:#ffc107;
+      --dark:#0b2540;
+      --muted:#6b7280;
+      --bgA:linear-gradient(135deg,#08325b 0%, #0b5ed7 100%);
+      --card:#ffffff;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      margin:0;
+      background:var(--bgA);
+      color:var(--dark);
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .wrap{max-width:1100px;margin:0 auto;}
+    .header{
+      display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;
+      background:white;padding:14px;border-radius:12px;
+      box-shadow:0 6px 18px rgba(11,37,64,0.15);
+    }
+    .logos{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
+    .logos img{height:56px;width:auto;background:white;padding:6px;border-radius:8px;box-shadow:0 6px 18px rgba(11,37,64,0.04);}
+    h1{margin:0;font-size:22px;text-align:center;color:var(--dark);}
+    p.sub{margin:6px 0 0;text-align:center;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;margin-top:18px;}
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:16px;
+      box-shadow:0 8px 30px rgba(11,37,64,0.1);
+    }
+
+    label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;color:var(--dark);}
+    input[type="number"],select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid #e6eef7;
+      font-size:14px;
+      background:white;
+    }
+    .small{font-size:13px;color:var(--muted);margin-top:6px}
+
+    .controls{
+      display:flex;gap:8px;margin-top:12px;align-items:center;
+      flex-wrap:wrap;justify-content:flex-start
+    }
+    button{
+      background:var(--blue);color:white;border:0;padding:10px 14px;
+      border-radius:10px;font-weight:700;cursor:pointer;
+      transition:background 0.2s ease;
+    }
+    button:hover{background:#0847a5;}
+    button.yellow{background:var(--yellow);color:var(--dark);}
+    a.back{
+      padding:10px 14px;
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--blue);
+      font-weight:700;
+      border:2px solid var(--blue);
+      transition:all 0.3s ease;
+    }
+    a.back:hover{
+      background:var(--blue);
+      color:white;
+    }
+
+    .result{
+      border-radius:10px;
+      padding:12px;
+      background:linear-gradient(180deg,#ffffff,#fbfdff);
+      border:1px solid #eef6ff;
+    }
+    .big{font-size:20px;font-weight:800;color:var(--dark);}
+    .muted{color:var(--muted);}
+
+    table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;}
+    table th,table td{
+      padding:8px 6px;
+      border-bottom:1px solid #eef3f6;
+      text-align:right;
+    }
+    table th{text-align:left;color:var(--muted);font-weight:700;}
+    .table-wrap{
+      max-height:360px;
+      overflow:auto;
+      margin-top:10px;
+      background:white;
+      padding:8px;
+      border-radius:8px;
+      border:1px solid #eef3f6;
+    }
+
+    @media(max-width:800px){
+      .grid{grid-template-columns:1fr;}
+      .header{text-align:center;}
+      .controls{justify-content:center;}
+      h1{font-size:18px;}
+      .wrap{padding:10px;}
+      .table-wrap{max-height:none;overflow-x:auto;}
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logos">
+        <img src="./img/logo-rombo.png" alt="Rombo" />
+        <img src="./img/logo-tecnologica.png" alt="Tecnológica del Oriente" />
+      </div>
+      <div style="flex:1 1 100%;">
+        <h1>Simulador de crédito — Quincenal (12 cuotas fijas)</h1>
+        <p class="sub">Tasa 0,896% quincenal (≈2% mensual) · Fee y seguro financiados · Cuota inicial 8–40%</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Formulario -->
+      <div class="card">
+        <label>Valor matrícula (COP)</label>
+        <input id="monto" type="number" placeholder="Ej. 2,108,000" />
+
+        <label style="margin-top:12px;">Cuota inicial (%)</label>
+        <input id="inicial" type="number" min="8" max="40" placeholder="Entre 8% y 40%" />
+        <div class="small">Debe ser mínimo del 8% y máximo del 40%</div>
+
+        <div class="controls">
+          <button onclick="calcularQuincenal()">Calcular</button>
+          <button class="yellow" onclick="generarPDF()">PDF</button>
+          <a class="back" href="index.html">Volver al inicio</a>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="card">
+        <div class="result" id="resultado">
+          <p class="muted">Resultado:</p>
+          <p class="big">Ingrese los datos para calcular.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card" style="margin-top:18px;">
+      <h3>Tabla de amortización</h3>
+      <div class="table-wrap">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th>Cuota</th>
+              <th>Abono a capital</th>
+              <th>Interés</th>
+              <th>Cuota total</th>
+              <th>Saldo final</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formato(valor){
+      return valor.toLocaleString('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0});
+    }
+
+    function calcularQuincenal(){
+      const monto=parseFloat(document.getElementById('monto').value);
+      const inicialPorc=parseFloat(document.getElementById('inicial').value);
+      const tasa=0.00896; // 0.896% quincenal
+      const n=12;
+      const fee=50000;
+      const seguro=20200;
+
+      if(isNaN(monto)||monto<=0){alert('Ingrese un valor de matrícula válido');return;}
+      if(isNaN(inicialPorc)||inicialPorc<8||inicialPorc>40){alert('La cuota inicial debe estar entre 8% y 40%');return;}
+
+      const cuotaInicial=monto*(inicialPorc/100);
+      const saldoBase=monto-cuotaInicial;
+      const valorFinanciar=saldoBase+fee+seguro;
+      const cuota=(tasa*valorFinanciar)/(1-Math.pow(1+tasa,-n));
+
+      let saldo=valorFinanciar;
+      let totalInteres=0;
+      let totalPagado=0;
+
+      const tbody=document.querySelector('#tabla tbody');
+      tbody.innerHTML='';
+
+      for(let i=1;i<=n;i++){
+        const interes=saldo*tasa;
+        const abono=cuota-interes;
+        saldo=saldo-abono;
+        totalInteres+=interes;
+        totalPagado+=cuota;
+
+        tbody.insertAdjacentHTML('beforeend',`
+          <tr>
+            <td>${i}</td>
+            <td>${formato(abono)}</td>
+            <td>${formato(interes)}</td>
+            <td>${formato(cuota)}</td>
+            <td>${formato(Math.max(0,saldo))}</td>
+          </tr>
+        `);
+      }
+
+      tbody.insertAdjacentHTML('beforeend',`
+        <tr style="font-weight:bold;background:#f9fafb;">
+          <td>Total</td>
+          <td>${formato(valorFinanciar)}</td>
+          <td>${formato(totalInteres)}</td>
+          <td>${formato(totalPagado)}</td>
+          <td></td>
+        </tr>
+      `);
+
+      const totalCredito=totalPagado+cuotaInicial;
+
+      document.getElementById('resultado').innerHTML=`
+        <p class="muted">Resumen:</p>
+        <p>Cuota inicial: <strong>${formato(cuotaInicial)}</strong></p>
+        <p>Fee (financiado): <strong>${formato(fee)}</strong></p>
+        <p>Seguro (financiado): <strong>${formato(seguro)}</strong></p>
+        <p>Valor a financiar: <strong>${formato(valorFinanciar)}</strong></p>
+        <p class="big">Cuota quincenal fija: ${formato(cuota)}</p>
+        <p>Intereses totales: ${formato(totalInteres)}</p>
+        <p>Total pagado (cuotas + inicial): <strong>${formato(totalCredito)}</strong></p>
+      `;
+    }
+
+    async function generarPDF(){
+      const{jsPDF}=window.jspdf;
+      const pdf=new jsPDF('p','pt','a4');
+      const elemento=document.body;
+      const canvas=await html2canvas(elemento,{scale:2});
+      const imgData=canvas.toDataURL('image/png');
+      const imgProps=pdf.getImageProperties(imgData);
+      const pdfWidth=pdf.internal.pageSize.getWidth();
+      const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
+      pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+      pdf.save('Simulador_Quincenal_Rombo.pdf');
+    }
+  </script>
+</body>
+</html>
